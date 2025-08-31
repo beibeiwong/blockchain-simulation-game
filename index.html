@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Mining Simulation Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🔗 Blockchain Mining Simulation</h1>
+            <p>Learn blockchain concepts through competitive mining!</p>
+        </header>
+
+        <!-- Role Selection Screen -->
+        <div id="roleSelectionScreen" class="screen">
+            <div class="role-selection-form">
+                <h2>Choose Your Role</h2>
+                <p>Select how you want to participate in the blockchain simulation</p>
+                <div class="role-buttons">
+                    <button id="instructorRoleBtn" class="role-button instructor-role">
+                        <div class="role-icon">👨‍🏫</div>
+                        <div class="role-title">Instructor</div>
+                        <div class="role-description">Create and manage a classroom session</div>
+                    </button>
+                    <button id="studentRoleBtn" class="role-button student-role">
+                        <div class="role-icon">👨‍🎓</div>
+                        <div class="role-title">Student</div>
+                        <div class="role-description">Join an existing classroom session</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructor Session Creation Screen -->
+        <div id="instructorSetupScreen" class="screen hidden">
+            <div class="session-form">
+                <h2>Create Classroom Session</h2>
+                <p>Set up a new session for your students to join</p>
+                <form id="instructorSetupForm">
+                    <div class="form-group">
+                        <label for="instructorNameInput">Your Name (Instructor):</label>
+                        <input type="text" id="instructorNameInput" placeholder="Enter your name" maxlength="20"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionIdInput">Session ID:</label>
+                        <input type="text" id="sessionIdInput" placeholder="Enter 4-8 characters (e.g., MATH101)"
+                            maxlength="8" required>
+                        <small>Students will use this ID to join your session</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficultySelect">Difficulty Level:</label>
+                        <select id="difficultySelect" required>
+                            <option value="">Choose difficulty level</option>
+                            <option value="4">Easy (4 zeros) - Beginner friendly</option>
+                            <option value="5">Medium (5 zeros) - Standard difficulty</option>
+                            <option value="6">Hard (6 zeros) - Advanced challenge</option>
+                            <option value="7">Expert (7 zeros) - Maximum difficulty</option>
+                        </select>
+                        <small>This sets the mining difficulty for all students in your session</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="backToRoleBtn" class="secondary-button">Back</button>
+                        <button type="submit" id="createSessionBtn" class="primary-button">Create Session</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Student Session Join Screen -->
+        <div id="studentJoinScreen" class="screen hidden">
+            <div class="session-form">
+                <h2>Join Classroom Session</h2>
+                <p>Enter the session ID provided by your instructor</p>
+                <form id="studentJoinForm">
+                    <div class="form-group">
+                        <label for="studentNameInput">Your Name:</label>
+                        <input type="text" id="studentNameInput" placeholder="Enter your name" maxlength="20" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="joinSessionIdInput">Session ID:</label>
+                        <input type="text" id="joinSessionIdInput" placeholder="Enter session ID from instructor"
+                            maxlength="8" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="backToRoleFromStudentBtn" class="secondary-button">Back</button>
+                        <button type="submit" id="joinSessionBtn" class="primary-button">Join Session</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="gameScreen" class="screen hidden">
+            <div class="instructions-bar">
+                <button id="instructionsBtn" class="instructions-button">📖 How to Mine Blocks</button>
+            </div>
+
+            <div class="game-header">
+                <div class="player-info">
+                    <span>Miner: <strong id="playerName"></strong></span>
+                    <span>Fees Earned: <strong id="playerScore">0</strong></span>
+                </div>
+                <div class="game-stats">
+                    <span>Block Height: <strong id="blockHeight">1</strong></span>
+                    <span>Difficulty: <strong id="difficulty">5</strong></span>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <div class="left-panel">
+                    <div class="section">
+                        <div class="section-header">
+                            <h3>📋 Pending Transactions</h3>
+                            <button id="addTransactionBtn" class="add-transaction-link">+ Add</button>
+                        </div>
+                        <div id="transactionPool" class="transaction-pool"></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>⛏️ Your Mining Block</h3>
+                        <div class="block-info">
+                            <p>Block Space: <span id="blockSpace">0/5</span></p>
+                            <div id="selectedTransactions" class="selected-transactions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="section">
+                        <h3>🔨 Mining Process</h3>
+                        <div class="mining-controls">
+                            <div class="hash-display">
+                                <label>Previous Hash:</label>
+                                <input type="text" id="prevHash" readonly>
+                            </div>
+                            <div class="hash-display">
+                                <label>Nonce:</label>
+                                <input type="number" id="nonceInput" value="0" min="0">
+                                <button id="incrementNonce">+1</button>
+                            </div>
+                            <div class="hash-display">
+                                <label>Target (must start with):</label>
+                                <input type="text" id="targetHash" readonly>
+                            </div>
+                            <div class="hash-display">
+                                <label>Current Hash:</label>
+                                <input type="text" id="currentHash" readonly>
+                            </div>
+
+                            <div class="difficulty-control">
+                                <label>Difficulty (leading zeros):</label>
+                                <input type="number" id="difficultyInput" value="5" min="4" max="7">
+                                <button id="updateDifficultyBtn">Update</button>
+                            </div>
+                            <div class="mining-actions">
+                                <button id="prepareBlockBtn">Prepare Block</button>
+                                <button id="autoMineBtn" disabled>Mine Now</button>
+                                <button id="submitBlockBtn" disabled>Submit Block</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>📊 Leaderboard</h3>
+                        <div id="leaderboard" class="leaderboard"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>⛓️ Blockchain</h3>
+                <div id="blockchain" class="blockchain"></div>
+            </div>
+        </div>
+
+        <!-- Instructions Modal -->
+        <div id="instructionsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🔗 How to Mine Blocks</h2>
+                    <button id="closeInstructionsBtn" class="close-button">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="instruction-section">
+                        <h3>🎯 Your Goal</h3>
+                        <p>Compete with other miners to add the next block to the blockchain and earn rewards!</p>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>⛏️ Mining Steps</h3>
+                        <ol>
+                            <li><strong>Select Transactions:</strong> Click on up to 5 pending transactions to include
+                                in your block</li>
+                            <li><strong>Find Valid Hash:</strong> Adjust the nonce until your block hash starts with
+                                enough zeros</li>
+                            <li><strong>Submit Block:</strong> Once you find a valid hash, submit your block to earn
+                                rewards</li>
+                        </ol>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🔢 Key Concepts</h3>
+                        <ul>
+                            <li><strong>Hash:</strong> A unique fingerprint for your block's data</li>
+                            <li><strong>Nonce:</strong> A number you change to modify the hash</li>
+                            <li><strong>Difficulty:</strong> How many zeros the hash must start with</li>
+                            <li><strong>Proof of Work:</strong> Finding the right nonce proves you did computational
+                                work</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>💰 Rewards</h3>
+                        <ul>
+                            <li><strong>Block Reward:</strong> 3 coins for successfully mining a block</li>
+                            <li><strong>Transaction Fees:</strong> Additional coins from the transactions you include
+                            </li>
+                            <li><strong>Strategy:</strong> Choose transactions with higher fees to maximize earnings
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🚀 Pro Tips</h3>
+                        <ul>
+                            <li>Use "Auto Mine" to automatically search for valid nonces</li>
+                            <li>Higher difficulty means more zeros required (harder to find)</li>
+                            <li>First miner to find a valid hash wins the block</li>
+                            <li>Add your own transactions to increase the pool size</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Transaction Modal -->
+        <div id="addTransactionModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>💸 Create New Transaction</h2>
+                    <button id="closeAddTransactionBtn" class="close-button">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTransactionForm">
+                        <div class="form-group">
+                            <label for="senderInput">From (Sender):</label>
+                            <input type="text" id="senderInput" placeholder="Enter sender name" maxlength="20" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="receiverInput">To (Receiver):</label>
+                            <input type="text" id="receiverInput" placeholder="Enter receiver name" maxlength="20"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="amountInput">Amount (coins):</label>
+                            <input type="number" id="amountInput" placeholder="0.00" min="0.01" max="1000" step="0.01"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="feeInput">Transaction Fee (coins):</label>
+                            <input type="number" id="feeInput" placeholder="0.001" min="0.001" max="10" step="0.001"
+                                required>
+                            <small>Higher fees increase chances of being mined first</small>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancelTransactionBtn">Cancel</button>
+                            <button type="submit" id="createTransactionBtn">Create Transaction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="notifications" class="notifications"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

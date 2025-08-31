@@ -1,0 +1,909 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.screen {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Role Selection Screen */
+.role-selection-form {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.role-selection-form h2 {
+    margin-bottom: 10px;
+    color: #4a5568;
+    font-size: 2em;
+}
+
+.role-selection-form p {
+    margin-bottom: 40px;
+    color: #718096;
+    font-size: 1.1em;
+}
+
+.role-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.role-button {
+    background: white;
+    border: 3px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 30px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.role-button:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.role-button.instructor-role:hover {
+    border-color: #9f7aea;
+    box-shadow: 0 8px 25px rgba(159, 122, 234, 0.15);
+}
+
+.role-button.student-role:hover {
+    border-color: #38a169;
+    box-shadow: 0 8px 25px rgba(56, 161, 105, 0.15);
+}
+
+.role-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.role-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #4a5568;
+    margin-bottom: 10px;
+}
+
+.role-description {
+    color: #718096;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+/* Session Setup Forms */
+.session-form {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.session-form h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #4a5568;
+    font-size: 1.8em;
+}
+
+.session-form > p {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #718096;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #667eea;
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #718096;
+    font-size: 0.85em;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.primary-button {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.primary-button:hover {
+    background: #5a67d8;
+}
+
+.secondary-button {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.secondary-button:hover {
+    background: #cbd5e0;
+}
+
+/* Responsive Design for Role Selection */
+@media (max-width: 768px) {
+    .role-buttons {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+/* Instructions Bar */
+.instructions-bar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.instructions-button {
+    background: #4299e1;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.instructions-button:hover {
+    background: #3182ce;
+}
+
+/* Game Screen */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f7fafc;
+    border-radius: 10px;
+}
+
+.player-info, .game-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.game-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.section h3 {
+    margin-bottom: 15px;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 5px;
+}
+
+/* Override for sections that don't use the header layout */
+.section:not(:has(.section-header)) h3 {
+    margin-bottom: 15px;
+}
+
+/* Section Header with Add Transaction Link */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h3 {
+    margin-bottom: 0;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 5px;
+    flex: 1;
+}
+
+.add-transaction-link {
+    background: none;
+    color: #718096;
+    border: 1px solid #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-left: 10px;
+}
+
+.add-transaction-link:hover {
+    background: #f7fafc;
+    color: #4a5568;
+    border-color: #cbd5e0;
+}
+
+/* Transaction Pool */
+.transaction-pool {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.transaction {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+}
+
+.transaction.selected {
+    background: #e6fffa;
+    border-color: #38b2ac;
+}
+
+.transaction-info {
+    flex: 1;
+}
+
+.transaction-fee {
+    font-weight: bold;
+    color: #38a169;
+}
+
+/* Block Info */
+.block-info {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    background: #f7fafc;
+}
+
+.selected-transactions {
+    margin-top: 10px;
+}
+
+.selected-transaction {
+    background: #e6fffa;
+    border: 1px solid #38b2ac;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* Mining Controls */
+.mining-controls {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f7fafc;
+}
+
+.hash-display {
+    margin-bottom: 15px;
+}
+
+.hash-display label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.hash-display input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.hash-display input[type="number"] {
+    width: calc(100% - 50px);
+    display: inline-block;
+}
+
+.difficulty-control {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #e6fffa;
+    border-radius: 6px;
+    border: 1px solid #38b2ac;
+}
+
+.difficulty-control label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.difficulty-control input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.difficulty-control button {
+    padding: 5px 15px;
+    background: #38b2ac;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#incrementNonce {
+    width: 40px;
+    margin-left: 5px;
+    padding: 8px 5px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.mining-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mining-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+#prepareBlockBtn {
+    background: #9f7aea;
+    color: white;
+}
+
+#autoMineBtn {
+    background: #ed8936;
+    color: white;
+}
+
+#submitBlockBtn {
+    background: #38a169;
+    color: white;
+}
+
+#submitBlockBtn:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+}
+
+/* Leaderboard */
+.leaderboard {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    background: #f7fafc;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.leaderboard-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.leaderboard-entry:last-child {
+    border-bottom: none;
+}
+
+.leaderboard-header {
+    text-align: center;
+    font-weight: bold;
+    color: #4a5568;
+    padding: 10px 0;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 10px;
+}
+
+.leaderboard-divider {
+    text-align: center;
+    color: #a0aec0;
+    padding: 5px 0;
+    font-weight: bold;
+}
+
+.current-player {
+    background: #e6fffa !important;
+    border: 1px solid #38b2ac !important;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* Game Mode Controls */
+.game-mode-control {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 2px solid #e2e8f0;
+}
+
+.game-mode-control label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+#gameModeBtn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.mode-beginner {
+    background: #48bb78;
+    color: white;
+}
+
+.mode-intermediate {
+    background: #ed8936;
+    color: white;
+}
+
+.mode-advanced {
+    background: #e53e3e;
+    color: white;
+}
+
+/* Mode-specific UI */
+.mode-info {
+    transition: all 0.3s;
+}
+
+.current-block-status {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f7fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.block-progress {
+    font-size: 14px;
+}
+
+.mined-transaction {
+    padding: 5px;
+    margin: 5px 0;
+    background: #c6f6d5;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #2d3748;
+}
+
+#targetTransactionInfo {
+    font-weight: bold;
+    color: #2d3748;
+    background: #e6fffa;
+    padding: 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+/* Blockchain */
+.blockchain {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 20px;
+    background: #f7fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.block {
+    min-width: 200px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    position: relative;
+}
+
+.block.genesis {
+    border-color: #9f7aea;
+}
+
+.block.mined {
+    border-color: #38a169;
+}
+
+.block-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #4a5568;
+}
+
+.block-hash {
+    font-family: monospace;
+    font-size: 10px;
+    color: #718096;
+    word-break: break-all;
+    margin-bottom: 10px;
+}
+
+.block-transactions {
+    font-size: 12px;
+}
+
+.block-miner {
+    font-size: 12px;
+    color: #38a169;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* Notifications */
+.notifications {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.notification {
+    background: #38a169;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease;
+}
+
+.notification.error {
+    background: #e53e3e;
+}
+
+.notification.warning {
+    background: #ed8936;
+}
+
+.notification.info {
+    background: #4299e1;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .game-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .blockchain {
+        flex-direction: column;
+    }
+    
+    .mining-actions {
+        flex-direction: column;
+    }
+}
+/* Moda
+l Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 600px;
+    max-height: 80vh;
+    width: 90%;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f7fafc;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #4a5568;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #718096;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.close-button:hover {
+    background: #e2e8f0;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+/* Instructions Modal */
+.instruction-section {
+    margin-bottom: 25px;
+}
+
+.instruction-section h3 {
+    color: #4a5568;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.instruction-section p {
+    color: #718096;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.instruction-section ol,
+.instruction-section ul {
+    color: #718096;
+    line-height: 1.6;
+    padding-left: 20px;
+}
+
+.instruction-section li {
+    margin-bottom: 8px;
+}
+
+.instruction-section strong {
+    color: #4a5568;
+}
+
+/* Add Transaction Form */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4299e1;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #718096;
+    font-size: 12px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#cancelTransactionBtn {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+#cancelTransactionBtn:hover {
+    background: #cbd5e0;
+}
+
+#createTransactionBtn {
+    background: #38a169;
+    color: white;
+}
+
+#createTransactionBtn:hover {
+    background: #2f855a;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header,
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+}
