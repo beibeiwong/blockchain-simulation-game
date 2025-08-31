@@ -4,7 +4,7 @@ An educational blockchain mining game designed for university students to learn 
 
 ## 🌐 Live Demo
 
-**Game URL**: https://beibeiwong.github.io/your-repo-name
+**Game URL**: https://beibeiwong.github.io/blockchain-simulation-game
 
 ## 👨‍🏫 For Instructors
 
