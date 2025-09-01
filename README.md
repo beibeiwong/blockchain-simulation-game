@@ -4,7 +4,19 @@ An educational blockchain mining game designed for university students to learn 
 
 ## 🌐 Live Demo
 
-**Game URL**: https://beibeiwong.github.io/blockchain-simulation-game
+**Game URL**: `https://yourusername.github.io/your-repo-name` *(Replace with your actual GitHub Pages URL)*
+
+## 🔥 Firebase Setup (Required for Real-Time Sync)
+
+### Quick Setup:
+1. **Create Firebase Project**: Go to [Firebase Console](https://console.firebase.google.com/)
+2. **Enable Realtime Database**: Choose "Start in test mode"
+3. **Get Config**: Project Settings > General > Your apps > Web app
+4. **Update script.js**: Replace the `firebaseConfig` object with your credentials
+5. **Deploy**: Push changes to GitHub
+
+### Detailed Instructions:
+See `firebase-config-template.js` for step-by-step setup guide.
 
 ## 👨‍🏫 For Instructors
 

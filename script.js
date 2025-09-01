@@ -1,3 +1,18 @@
+// Firebase Configuration - Your actual config
+const firebaseConfig = {
+    apiKey: "AIzaSyBF14U4jZOg4wGe0F9VRE6YZx-BEgYlH2Q",
+    authDomain: "blockchain-simulation-game.firebaseapp.com",
+    databaseURL: "https://blockchain-simulation-game-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "blockchain-simulation-game",
+    storageBucket: "blockchain-simulation-game.firebasestorage.app",
+    messagingSenderId: "834318405949",
+    appId: "1:834318405949:web:fb533091374f22ea1d7554"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 class BlockchainGame {
     constructor() {
         this.player = null;
@@ -14,6 +29,7 @@ class BlockchainGame {
         this.sessionId = null;
         this.userRole = null; // 'instructor' or 'student'
         this.maxParticipants = 80; // Increased from 50
+        this.firebaseListeners = []; // Track Firebase listeners for cleanup
         
         this.setupEventListeners();
         this.initializeBlockchain(); // Only initialize blockchain, not the display
@@ -407,13 +423,16 @@ class BlockchainGame {
     }
 
     updateSessionDifficulty(newDifficulty) {
-        const sessionDataStr = localStorage.getItem(`blockchain_session_${this.sessionId}`);
-        if (sessionDataStr) {
-            const sessionData = JSON.parse(sessionDataStr);
-            sessionData.gameState.difficulty = newDifficulty;
-            sessionData.settings.lastUpdated = Date.now();
-            localStorage.setItem(`blockchain_session_${this.sessionId}`, JSON.stringify(sessionData));
-        }
+        if (!this.sessionId) return;
+        
+        const updates = {};
+        updates[`sessions/${this.sessionId}/gameState/difficulty`] = newDifficulty;
+        updates[`sessions/${this.sessionId}/settings/lastUpdated`] = Date.now();
+        
+        database.ref().update(updates).catch((error) => {
+            console.error('Error updating difficulty:', error);
+            this.showNotification('Error updating difficulty. Please try again.', 'error');
+        });
     }
 
     updateMiningButtons() {
@@ -613,6 +632,7 @@ class BlockchainGame {
             miner: this.player.name
         };
 
+        // Add block to local blockchain first
         this.blockchain.push(newBlock);
         
         // Calculate rewards - focus on transaction fees
@@ -631,6 +651,12 @@ class BlockchainGame {
             this.transactionPool = this.transactionPool.filter(poolTx => poolTx.id !== selectedTx.id);
         });
 
+        // Update Firebase with new block and game state
+        if (this.sessionId) {
+            this.updateFirebaseGameState();
+            this.updateFirebasePlayerScore(this.player.name, this.player.score, this.player.blocksMinedCount, this.player.totalFeesEarned);
+        }
+
         // Reset for next block
         this.selectedTransactions = [];
         this.blockHeight++;
@@ -647,7 +673,7 @@ class BlockchainGame {
 
         this.generateTransactions();
         this.updateDisplay();
-        this.showNotification(`🎉 Transactions submitted to Block #${newBlock.index}! Earned ${transactionFees.toFixed(3)} in fees!`, 'success');
+        this.showNotification(`🎉 Block #${newBlock.index} mined successfully! Earned ${transactionFees.toFixed(3)} in fees!`, 'success');
     }
 
 
@@ -794,118 +820,147 @@ class BlockchainGame {
     }
 
     createSession(sessionId, instructorName, difficulty) {
-        // Check if session already exists
-        const existingSession = localStorage.getItem(`blockchain_session_${sessionId}`);
-        if (existingSession) {
-            this.showNotification('Session ID already exists. Please choose a different ID.', 'error');
-            return;
-        }
-        
-        // Set the difficulty for this session
-        this.difficulty = difficulty;
-        
-        // Create new session data
-        const sessionData = {
-            sessionId: sessionId,
-            instructor: {
-                name: instructorName,
-                joinTime: Date.now()
-            },
-            participants: [
-                {
+        // Check if session already exists in Firebase
+        database.ref(`sessions/${sessionId}`).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    this.showNotification('Session ID already exists. Please choose a different ID.', 'error');
+                    return;
+                }
+                
+                // Set the difficulty for this session
+                this.difficulty = difficulty;
+                
+                // Create new session data
+                const sessionData = {
+                    sessionId: sessionId,
+                    instructor: {
+                        name: instructorName,
+                        joinTime: Date.now()
+                    },
+                    participants: {
+                        [instructorName]: {
+                            name: instructorName,
+                            role: 'instructor',
+                            joinTime: Date.now(),
+                            score: 0,
+                            blocksMinedCount: 0,
+                            totalFeesEarned: 0
+                        }
+                    },
+                    gameState: {
+                        blockchain: [...this.blockchain],
+                        transactionPool: [...this.transactionPool],
+                        difficulty: difficulty,
+                        blockHeight: this.blockHeight,
+                        currentBlockRace: {
+                            blockHeight: this.blockHeight,
+                            isActive: false,
+                            participants: [],
+                            winner: null,
+                            winningTimestamp: null
+                        },
+                        recentActivity: []
+                    },
+                    settings: {
+                        maxParticipants: this.maxParticipants,
+                        createdAt: Date.now(),
+                        lastUpdated: Date.now()
+                    }
+                };
+                
+                // Save session data to Firebase
+                return database.ref(`sessions/${sessionId}`).set(sessionData);
+            })
+            .then(() => {
+                // Set instance variables
+                this.sessionId = sessionId;
+                this.userRole = 'instructor';
+                this.player = {
                     name: instructorName,
                     role: 'instructor',
                     joinTime: Date.now(),
                     score: 0,
                     blocksMinedCount: 0,
                     totalFeesEarned: 0
-                }
-            ],
-            gameState: {
-                blockchain: [...this.blockchain],
-                transactionPool: [...this.transactionPool],
-                difficulty: difficulty,
-                blockHeight: this.blockHeight,
-                currentBlockRace: {
-                    blockHeight: this.blockHeight,
-                    isActive: false,
-                    participants: [],
-                    winner: null,
-                    winningTimestamp: null
-                },
-                recentActivity: []
-            },
-            settings: {
-                maxParticipants: this.maxParticipants,
-                createdAt: Date.now(),
-                lastUpdated: Date.now()
-            }
-        };
-        
-        // Save session data
-        localStorage.setItem(`blockchain_session_${sessionId}`, JSON.stringify(sessionData));
-        localStorage.setItem('blockchain_current_session', sessionId);
-        localStorage.setItem('blockchain_user_role', 'instructor');
-        
-        // Set instance variables
-        this.sessionId = sessionId;
-        this.userRole = 'instructor';
-        this.player = sessionData.participants[0];
-        this.players.set(instructorName, this.player);
-        
-        // Start the game
-        this.startSessionGame();
-        
-        this.showNotification(`✅ Session "${sessionId}" created successfully! Share this ID with your students.`, 'success');
+                };
+                this.players.set(instructorName, this.player);
+                
+                // Set up Firebase listeners for real-time updates
+                this.setupFirebaseListeners();
+                
+                // Start the game
+                this.startSessionGame();
+                
+                this.showNotification(`✅ Session "${sessionId}" created successfully! Share this ID with your students.`, 'success');
+            })
+            .catch((error) => {
+                console.error('Error creating session:', error);
+                this.showNotification('Error creating session. Please try again.', 'error');
+            });
     }
 
     joinSession(sessionId, studentName) {
-        // Try to load existing session
-        const sessionDataStr = localStorage.getItem(`blockchain_session_${sessionId}`);
-        if (!sessionDataStr) {
-            // Create new session if it doesn't exist (for local testing)
-            this.createNewSessionForStudent(sessionId, studentName);
-            return;
-        }
+        // Try to load existing session from Firebase
+        database.ref(`sessions/${sessionId}`).once('value')
+            .then((snapshot) => {
+                if (!snapshot.exists()) {
+                    this.showNotification('Session not found. Please check the session ID.', 'error');
+                    return;
+                }
+                
+                const sessionData = snapshot.val();
         
-        const sessionData = JSON.parse(sessionDataStr);
-        
-        // Check if session is full
-        if (sessionData.participants.length >= this.maxParticipants) {
-            this.showNotification(`Session is full! Maximum ${this.maxParticipants} participants allowed.`, 'error');
-            return;
-        }
-        
-        // Check if username already exists
-        if (sessionData.participants.find(p => p.name === studentName)) {
-            this.showNotification('Username already taken in this session. Please choose a different name.', 'error');
-            return;
-        }
-        
-        // Add student to session
-        const studentData = {
-            name: studentName,
-            role: 'student',
-            joinTime: Date.now(),
-            score: 0,
-            blocksMinedCount: 0,
-            totalFeesEarned: 0
-        };
-        
-        sessionData.participants.push(studentData);
-        sessionData.settings.lastUpdated = Date.now();
-        
-        // Save updated session data
-        localStorage.setItem(`blockchain_session_${sessionId}`, JSON.stringify(sessionData));
-        localStorage.setItem('blockchain_current_session', sessionId);
-        localStorage.setItem('blockchain_user_role', 'student');
-        
-        // Set instance variables
-        this.sessionId = sessionId;
-        this.userRole = 'student';
-        this.player = studentData;
-        
-        // Load session game state
+                // Check if session is full
+                const participantCount = Object.keys(sessionData.participants).length;
+                if (participantCount >= this.maxParticipants) {
+                    this.showNotification(`Session is full! Maximum ${this.maxParticipants} participants allowed.`, 'error');
+                    return;
+                }
+                
+                // Check if username already exists
+                if (sessionData.participants[studentName]) {
+                    this.showNotification('Username already taken in this session. Please choose a different name.', 'error');
+                    return;
+                }
+                
+                // Add student to session
+                const studentData = {
+                    name: studentName,
+                    role: 'student',
+                    joinTime: Date.now(),
+                    score: 0,
+                    blocksMinedCount: 0,
+                    totalFeesEarned: 0
+                };
+                
+                // Update session data in Firebase
+                const updates = {};
+                updates[`sessions/${sessionId}/participants/${studentName}`] = studentData;
+                updates[`sessions/${sessionId}/settings/lastUpdated`] = Date.now();
+                
+                return database.ref().update(updates);
+            })
+            .then(() => {
+                // Set instance variables
+                this.sessionId = sessionId;
+                this.userRole = 'student';
+                this.player = {
+                    name: studentName,
+                    role: 'student',
+                    joinTime: Date.now(),
+                    score: 0,
+                    blocksMinedCount: 0,
+                    totalFeesEarned: 0
+                };
+                
+                // Set up Firebase listeners for real-time updates
+                this.setupFirebaseListeners();
+                
+                // Load session game state from Firebase
+                this.loadFirebaseGameState();
+                
+                // Start the game
         this.loadSessionGameState(sessionData);
         
         // Start the game
@@ -1039,3 +1094,120 @@ class BlockchainGame {
 document.addEventListener('DOMContentLoaded', () => {
     new BlockchainGame();
 });
+ 
+   setupFirebaseListeners() {
+        if (!this.sessionId) return;
+        
+        // Listen for blockchain updates
+        const blockchainRef = database.ref(`sessions/${this.sessionId}/gameState/blockchain`);
+        const blockchainListener = blockchainRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                this.blockchain = snapshot.val();
+                this.updateBlockchainDisplay();
+            }
+        });
+        this.firebaseListeners.push({ ref: blockchainRef, listener: blockchainListener });
+        
+        // Listen for transaction pool updates
+        const transactionRef = database.ref(`sessions/${this.sessionId}/gameState/transactionPool`);
+        const transactionListener = transactionRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                this.transactionPool = snapshot.val();
+                this.updateTransactionPoolDisplay();
+            }
+        });
+        this.firebaseListeners.push({ ref: transactionRef, listener: transactionListener });
+        
+        // Listen for participant updates (leaderboard)
+        const participantsRef = database.ref(`sessions/${this.sessionId}/participants`);
+        const participantsListener = participantsRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                const participants = snapshot.val();
+                this.players.clear();
+                Object.values(participants).forEach(participant => {
+                    this.players.set(participant.name, participant);
+                });
+                this.updateLeaderboard();
+            }
+        });
+        this.firebaseListeners.push({ ref: participantsRef, listener: participantsListener });
+        
+        // Listen for difficulty changes
+        const difficultyRef = database.ref(`sessions/${this.sessionId}/gameState/difficulty`);
+        const difficultyListener = difficultyRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                this.difficulty = snapshot.val();
+                this.updateDisplay();
+            }
+        });
+        this.firebaseListeners.push({ ref: difficultyRef, listener: difficultyListener });
+        
+        // Listen for block height updates
+        const blockHeightRef = database.ref(`sessions/${this.sessionId}/gameState/blockHeight`);
+        const blockHeightListener = blockHeightRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                this.blockHeight = snapshot.val();
+                this.updateDisplay();
+            }
+        });
+        this.firebaseListeners.push({ ref: blockHeightRef, listener: blockHeightListener });
+    }
+    
+    loadFirebaseGameState() {
+        if (!this.sessionId) return;
+        
+        database.ref(`sessions/${this.sessionId}/gameState`).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    const gameState = snapshot.val();
+                    this.blockchain = gameState.blockchain || [];
+                    this.transactionPool = gameState.transactionPool || [];
+                    this.difficulty = gameState.difficulty || 5;
+                    this.blockHeight = gameState.blockHeight || 1;
+                    
+                    // Start the game
+                    this.startSessionGame();
+                    
+                    const participantCount = Object.keys(snapshot.ref.parent.child('participants').val() || {}).length;
+                    this.showNotification(`✅ Joined session "${this.sessionId}"! (${participantCount}/${this.maxParticipants} participants)`, 'success');
+                }
+            })
+            .catch((error) => {
+                console.error('Error loading game state:', error);
+                this.showNotification('Error loading session data.', 'error');
+            });
+    }
+    
+    updateFirebaseGameState() {
+        if (!this.sessionId) return;
+        
+        const updates = {};
+        updates[`sessions/${this.sessionId}/gameState/blockchain`] = this.blockchain;
+        updates[`sessions/${this.sessionId}/gameState/transactionPool`] = this.transactionPool;
+        updates[`sessions/${this.sessionId}/gameState/blockHeight`] = this.blockHeight;
+        updates[`sessions/${this.sessionId}/settings/lastUpdated`] = Date.now();
+        
+        database.ref().update(updates).catch((error) => {
+            console.error('Error updating game state:', error);
+        });
+    }
+    
+    updateFirebasePlayerScore(playerName, newScore, blocksMinedCount, totalFeesEarned) {
+        if (!this.sessionId) return;
+        
+        const updates = {};
+        updates[`sessions/${this.sessionId}/participants/${playerName}/score`] = newScore;
+        updates[`sessions/${this.sessionId}/participants/${playerName}/blocksMinedCount`] = blocksMinedCount;
+        updates[`sessions/${this.sessionId}/participants/${playerName}/totalFeesEarned`] = totalFeesEarned;
+        
+        database.ref().update(updates).catch((error) => {
+            console.error('Error updating player score:', error);
+        });
+    }
+    
+    cleanupFirebaseListeners() {
+        this.firebaseListeners.forEach(({ ref, listener }) => {
+            ref.off('value', listener);
+        });
+        this.firebaseListeners = [];
+    }
